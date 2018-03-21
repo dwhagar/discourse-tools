@@ -1,4 +1,4 @@
-# discouse-tools
+# discourse-tools
 
 This project is simply a collection of various tools that I use with my discourse server.  There is nothing terribly
 there is nothing terribly special about them other than the fact that I figured someone else might find them useful in 
