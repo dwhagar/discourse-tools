@@ -4,7 +4,7 @@ import sys
 import json
 import subprocess
 import os
-from html.parser import HTMLParser
+import html
 
 # Pull notification data from the system.
 abspath = os.path.abspath(__file__)
@@ -149,9 +149,8 @@ def main():
                     push["message"] = None
 
                 if not (push["message"] is None):
-                    hparser = HTMLParser()
-                    push["message"] = hparser.unescape(push["message"])
-                    push["title"] = siteName + " : " + notice["fancy_title"]
+                    push["message"] = html.unescape(push["message"])
+                    push["title"] = html.unescape(siteName + " : " + notice["fancy_title"])
                     push["url"] = base + "/t/" + notice["slug"] + "/" + str(notice["topic_id"]) + "/" + str(notice["post_number"])
                     push["url_title"] = notice["data"]["topic_title"]
                     push["token"] = user["apiKey"]
