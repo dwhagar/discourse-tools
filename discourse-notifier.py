@@ -7,26 +7,78 @@ from dateutil.parser import parse
 
 ## TODO: Notification Types - 1 is an @Mention, 2 is a reply, 5 is a Like
 ## TODO: URL for notifications is notifications.js?api_key=blah&api_username=someone
-## TODO: Import JSON settings code
+
+if len(sys.argv) > 1:
+    fileName = sys.argv[1]
+else:
+    fileName = 'discourse-notifier.json'
+
+cfg = json.load(open(fileName))
+
+base = cfg["base"]
+key = cfg["key"]
+defaultUser = cfg["user"]
 
 # Define our URL values and API key / user to use.
-curlCmd = "curl -sX GET "
-curlPost = "curl -s -X POST -d "
+curlCmd = ["curl", "-sX", "GET"]
+curlPost = ["curl", "-s", "-X", "POST", "-d"]
 
-base = "https://forum.moltenaether.com"
-key = "b8dce6591ad59c414ef7bd6a03eb0030fc3c7677f63e54dd5b74fd561f6285b8"
-user = "cyclops"
-auth = "?api_key=" + key + "&api_username=" + user
-suffix = ".json" + auth
+def constructURL(call, userName = None):
+    # Construct a call URL to retrieve information from the forum.
+    if userName is None:
+        userName = defaultUser
 
-def getJSON(curlString):
+    auth = "?api_key=" + key + "&api_username=" + userName
+    suffix = ".json" + auth
+    return base + call + suffix
+
+def getJSON(url):
     # Retrieve JSON data.
-    curlList = curlString.split()
+    curlList = curlCmd[:]
+    curlList.append(url)
     rawOutput = subprocess.check_output(curlList)
     jData = json.loads(str(rawOutput, 'utf-8'))
     return jData
 
+def getPushData(userName):
+    # Gets any pushOver data from the system for a specific user.
+    url = constructURL("/users/" + userName)
+    userData = getJSON(url)
+
+    # Get PushOver Keys
+    userKey = userData["user"]["user_fields"]["3"]
+    apiKey = userData["user"]["user_fields"]["4"]
+
+    if (userKey is None) or (apiKey is None):
+        data = None
+    else:
+        data = {
+            "user":userName,
+            "userKey":userKey,
+            "apiKey":apiKey
+        }
+
+    return data
+
+def getUsers():
+    # Get a list of users.
+    url = constructURL("/admin/users/list/active")
+    userData = getJSON(url)
+    users = []
+
+    for user in userData:
+        if user["username"] != "discobot" and user["username"] != "system":
+            data = getPushData(user["username"])
+            if not data is None:
+                users.append(data)
+
+    return users
+
 def main():
+    # Get all users who have PushOver data from the forum.
+    users = getUsers()
+
+    
 
     return 0
 
