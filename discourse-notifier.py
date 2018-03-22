@@ -133,10 +133,10 @@ def main():
                 if notice["notification_type"] == 1: # Mention
                     push["message"] = "You were mentioned in " + notice["data"]["topic_title"] + " by " + notice["data"][
                         "display_username"] + "."
-                elif notice["notification_type"] == 2 or notice["notification_type"] == 3:
+                elif notice["notification_type"] == 2 or notice["notification_type"] == 9: # Reply
                     push["message"] = "A reply to " + notice["data"]["topic_title"] + " was posted by " + notice["data"][
                         "display_username"] + "."
-                elif notice["notification_type"] == 9: # Reply
+                elif notice["notification_type"] == 3: # Quoted
                     push["message"] = "You were quoted in " + notice["data"]["topic_title"] + " by " + notice["data"][
                         "display_username"] + "."
                 elif notice["notification_type"] == 5: # Like
