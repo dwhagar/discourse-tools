@@ -150,7 +150,7 @@ def main():
 
                 if not (push["message"] is None):
                     push["message"] = html.unescape(push["message"])
-                    push["title"] = html.unescape(siteName + " : " + notice["data"]["topic_title"])
+                    push["title"] = html.unescape(siteName + " Update")
                     push["url"] = base + "/t/" + notice["slug"] + "/" + str(notice["topic_id"]) + "/" + str(notice["post_number"])
                     push["url_title"] = html.unescape(notice["data"]["topic_title"])
                     push["token"] = user["apiKey"]
