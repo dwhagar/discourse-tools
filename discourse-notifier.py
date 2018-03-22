@@ -152,7 +152,7 @@ def main():
                     hparser = HTMLParser()
                     push["message"] = hparser.unescape(push["message"])
                     push["title"] = siteName + " : " + notice["fancy_title"]
-                    push["url"] = base + "/t/" + notice["slug"] + "/" + str(notice["post_number"])
+                    push["url"] = base + "/t/" + notice["slug"] + "/" + str(notice["topic_id"]) + "/" + str(notice["post_number"])
                     push["url_title"] = notice["data"]["topic_title"]
                     push["token"] = user["apiKey"]
                     push["user"] = user["userKey"]
