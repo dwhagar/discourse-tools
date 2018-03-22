@@ -6,6 +6,11 @@ import subprocess
 import os
 from html.parser import HTMLParser
 
+# Pull notification data from the system.
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 if len(sys.argv) > 1:
     fileName = sys.argv[1]
 else:
@@ -84,11 +89,6 @@ def getUsers():
 def main():
     # Get all users who have PushOver data from the forum.
     users = getUsers()
-
-    # Pull notification data from the system.
-    abspath = os.path.abspath(__file__)
-    dname = os.path.dirname(abspath)
-    os.chdir(dname)
 
     # Make sure the data directory exists.
     if not os.path.isdir("data"):
