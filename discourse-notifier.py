@@ -5,6 +5,10 @@ import json
 import subprocess
 from dateutil.parser import parse
 
+## TODO: Notification Types - 1 is an @Mention, 2 is a reply, 5 is a Like
+## TODO: URL for notifications is notifications.js?api_key=blah&api_username=someone
+## TODO: Import JSON settings code
+
 # Define our URL values and API key / user to use.
 curlCmd = "curl -sX GET "
 curlPost = "curl -s -X POST -d "
