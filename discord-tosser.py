@@ -102,7 +102,7 @@ def main():
 
     if jsonData["deleted_at"] != "nil":
         wasDeleted = True
-    if (jsonData["updated_at"] != jsonData["created_at"]) and (jsonData["post_number"] > 1):
+    if jsonData["updated_at"] != jsonData["created_at"]:
         wasEdited = True
     if jsonData["cooked"] == "":
         noText = True
