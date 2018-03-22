@@ -151,7 +151,7 @@ def main():
                 if not (push["message"] is None):
                     hparser = HTMLParser()
                     push["message"] = hparser.unescape(push["message"])
-                    push["title"] = notice["fancy_title"] + " @ " + siteName
+                    push["title"] = siteName + " : " + notice["fancy_title"]
                     push["url"] = base + "/t/" + notice["slug"] + "/" + str(notice["post_number"])
                     push["url_title"] = notice["data"]["topic_title"]
                     push["token"] = user["apiKey"]
