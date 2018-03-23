@@ -134,20 +134,20 @@ def main():
 
             for notice in toSend:
                 if notice["notification_type"] == 1: ### Mention ###
-                    push["message"] = emoji.emojize(":cyclone: You were mentioned in " + notice["data"]["topic_title"] + " by " + notice["data"][
-                        "display_username"] + ".")
+                    push["message"] = ":cyclone: You were mentioned in " + notice["data"]["topic_title"] + " by " + notice["data"][
+                        "display_username"] + "."
                 elif notice["notification_type"] == 2 or notice["notification_type"] == 9: ### Reply ###
-                    push["message"] = emoji.emojize(":leftwards_arrow_with_hook: A reply to " + notice["data"]["topic_title"] + " was posted by " + notice["data"][
-                        "display_username"] + ".")
+                    push["message"] = ":leftwards_arrow_with_hook: A reply to " + notice["data"]["topic_title"] + " was posted by " + notice["data"][
+                        "display_username"] + "."
                 elif notice["notification_type"] == 3: ### Quoted ###
-                    push["message"] = emoji.emojize(":speech_balloon: You were quoted in " + notice["data"]["topic_title"] + " by " + notice["data"][
-                        "display_username"] + ".")
+                    push["message"] = ":speech_balloon: You were quoted in " + notice["data"]["topic_title"] + " by " + notice["data"][
+                        "display_username"] + "."
                 elif notice["notification_type"] == 5: ### Like ###
-                    push["message"] = emoji.emojize(":heart: Your post in " + notice["data"]["topic_title"] + " was liked by " + notice["data"][
-                        "display_username"] + ".")
+                    push["message"] = ":heart: Your post in " + notice["data"]["topic_title"] + " was liked by " + notice["data"][
+                        "display_username"] + "."
                 elif notice["notification_type"] == 6: ### Private Message ###
-                    push["message"] = emoji.emojize("Y:envelope: ou received a private message from " + notice["data"]["display_username"]\
-                                      + " called " + notice["data"]["topic_title"] + ".")
+                    push["message"] = ":envelope: You received a private message from " + notice["data"]["display_username"]\
+                                      + " called " + notice["data"]["topic_title"] + "."
                 else:
                     push["message"] = None
 
@@ -156,7 +156,7 @@ def main():
                 # replies, that is the only one I see doubled up so far (but might be more).  One should always check
                 # periodically to make sure they got all their notifications.
                 if not (push["message"] is None):
-                    push["message"] = html.unescape(push["message"])
+                    push["message"] = emoji.emojize(html.unescape(push["message"]), use_aliases=True)
                     push["title"] = html.unescape(siteName + " Update")
                     push["url"] = base + "/t/" + notice["slug"] + "/" + str(notice["topic_id"]) + "/" + str(notice["post_number"])
                     push["url_title"] = html.unescape(notice["data"]["topic_title"])
