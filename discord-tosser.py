@@ -99,6 +99,7 @@ def main():
     wasDeleted = False
     wasEdited = False
     noText = False
+    autoLocked = False
 
     if jsonData["deleted_at"] != "nil":
         wasDeleted = True
@@ -106,8 +107,10 @@ def main():
         wasEdited = True
     if jsonData["cooked"] == "":
         noText = True
+    if jsonData["cooked"].find("topic was automatically closed") > -1:
+        autoLocked = True
 
-    if not (wasDeleted or wasEdited or noText):
+    if not (wasDeleted or wasEdited or noText or autoLocked):
         name = getCategory(jsonData["topic_id"])
         postURL = base + "/t/" + jsonData["topic_slug"] + "/" + str(jsonData["topic_id"]) + "/" + str(
             jsonData["post_number"])
