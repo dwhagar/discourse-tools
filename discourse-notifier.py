@@ -2,9 +2,9 @@
 
 import sys
 import json
-import subprocess
 import os
 import html
+import requests
 
 # Pull notification data from the system.
 abspath = os.path.abspath(__file__)
@@ -22,10 +22,6 @@ base = cfg["base"]
 key = cfg["key"]
 defaultUser = cfg["user"]
 siteName = cfg["name"]
-
-# Define our URL values and API key / user to use.
-curlCmd = ["curl", "-sX", "GET"]
-curlPost = ["curl", "-sH", "Content-Type: application/json", "-X", "POST", "-d"]
 pushURL = "https://api.pushover.net/1/messages.json"
 
 def constructURL(call, userName = None):
@@ -39,38 +35,35 @@ def constructURL(call, userName = None):
 
 def getJSON(url):
     # Retrieve JSON data.
-    curlList = curlCmd[:]
-    curlList.append(url)
-    rawOutput = subprocess.check_output(curlList)
-    jData = json.loads(str(rawOutput, 'utf-8'))
+    getRequest = requests.get(url)
+    if getRequest.status_code == 200 and getRequest.json() != {}:
+        jData = getRequest.json()
+    else:
+        with open("logs/errors.txt", 'w') as f:
+            print(getRequest.status_code, getRequest.text, file=f)
+        jData = {}
+
     return jData
 
 def getPushData(userName):
     # Gets any pushOver data from the system for a specific user.
     url = constructURL("/users/" + userName)
     userData = getJSON(url)
-    userFile = "logs/" + userName + ".error"
 
-    # Get PushOver Keys
-    try:
+    if userData != {}:
         userKey = userData["user"]["user_fields"]["3"]
         apiKey = userData["user"]["user_fields"]["4"]
-    except KeyError:
-        with open(userFile, 'w') as f:
-            print(userData, file=f)
 
-        userKey = None
-        apiKey = None
-        pass
-
-    if (userKey is None) or (apiKey is None):
-        data = None
+        if (userKey is None) or (apiKey is None):
+            data = None
+        else:
+            data = {
+                "user":userName,
+                "userKey":userKey,
+                "apiKey":apiKey
+            }
     else:
-        data = {
-            "user":userName,
-            "userKey":userKey,
-            "apiKey":apiKey
-        }
+        data = None
 
     return data
 
@@ -165,18 +158,14 @@ def main():
                     push["token"] = user["apiKey"]
                     push["user"] = user["userKey"]
 
-                    pushString = json.dumps(push)
-                    pushMessages.append(pushString)
+                    pushMessages.append(push)
 
         # Actually transmit the push notifications.
         if len(pushMessages) > 0:
             for message in pushMessages:
-                curlFinal = curlPost[:]
-                curlFinal.append(message)
-                curlFinal.append(pushURL)
-                rawOutput = subprocess.check_output(curlFinal)
+                r = requests.post(pushURL, json=message)
                 with open(userLog, 'w') as f:
-                    print(rawOutput, file=f)
+                    print(r.status_code, r.text, file=f)
 
     return 0
 
