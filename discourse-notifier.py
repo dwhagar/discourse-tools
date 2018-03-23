@@ -51,8 +51,13 @@ def getPushData(userName):
     userData = getJSON(url)
 
     # Get PushOver Keys
-    userKey = userData["user"]["user_fields"]["3"]
-    apiKey = userData["user"]["user_fields"]["4"]
+    try:
+        userKey = userData["user"]["user_fields"]["3"]
+        apiKey = userData["user"]["user_fields"]["4"]
+    except KeyError:
+        userKey = None
+        apiKey = None
+        pass
 
     if (userKey is None) or (apiKey is None):
         data = None
