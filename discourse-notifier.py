@@ -49,12 +49,16 @@ def getPushData(userName):
     # Gets any pushOver data from the system for a specific user.
     url = constructURL("/users/" + userName)
     userData = getJSON(url)
+    userFile = "logs/" + userName + ".error"
 
     # Get PushOver Keys
     try:
         userKey = userData["user"]["user_fields"]["3"]
         apiKey = userData["user"]["user_fields"]["4"]
     except KeyError:
+        with open(userFile, 'w') as f:
+            print(userData, file=f)
+
         userKey = None
         apiKey = None
         pass
