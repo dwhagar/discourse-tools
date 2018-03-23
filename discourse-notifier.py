@@ -132,24 +132,28 @@ def main():
             push = {}
 
             for notice in toSend:
-                if notice["notification_type"] == 1: # Mention
+                if notice["notification_type"] == 1: ### Mention ###
                     push["message"] = "You were mentioned in " + notice["data"]["topic_title"] + " by " + notice["data"][
                         "display_username"] + "."
-                elif notice["notification_type"] == 2 or notice["notification_type"] == 9: # Reply
+                elif notice["notification_type"] == 2 or notice["notification_type"] == 9: ### Reply ###
                     push["message"] = "A reply to " + notice["data"]["topic_title"] + " was posted by " + notice["data"][
                         "display_username"] + "."
-                elif notice["notification_type"] == 3: # Quoted
+                elif notice["notification_type"] == 3: ### Quoted ###
                     push["message"] = "You were quoted in " + notice["data"]["topic_title"] + " by " + notice["data"][
                         "display_username"] + "."
-                elif notice["notification_type"] == 5: # Like
+                elif notice["notification_type"] == 5: ### Like ###
                     push["message"] = "Your post in " + notice["data"]["topic_title"] + " was liked by " + notice["data"][
                         "display_username"] + "."
-                elif notice["notification_type"] == 6: # Private Message
+                elif notice["notification_type"] == 6: ### Private Message ###
                     push["message"] = "You received a private message from " + notice["data"]["display_username"]\
                                       + " called " + notice["data"]["topic_title"] + "."
                 else:
                     push["message"] = None
 
+                # Basically if we don't know what the notification is for, we don't want to send it.  I could not find
+                # a list of the notification types, I do not know why some notifications are type 2 and type 9 for
+                # replies, that is the only one I see doubled up so far (but might be more).  One should always check
+                # periodically to make sure they got all their notifications.
                 if not (push["message"] is None):
                     push["message"] = html.unescape(push["message"])
                     push["title"] = html.unescape(siteName + " Update")
