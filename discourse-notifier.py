@@ -119,7 +119,7 @@ def main():
                 toSend.append(notice)
 
         # Update the last seen notification
-        if len(user["notices"]) > 0:
+        if (len(user["notices"]) > 0) and (lastNotice < int(user["notices"][0]["id"])):
             lastNotice = int(user["notices"][0]["id"])
             with open(userFile, 'w') as f:
                 print(lastNotice, file=f)
