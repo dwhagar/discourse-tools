@@ -45,12 +45,12 @@ def getJSON(url):
 
     return jData
 
-def getCategory(topicID):
+def getCategory(topicSlug, topicID):
     # Initialize our return value.
     catName = "Uh..."
 
     # Get the topic's category ID
-    topicURL = base + "/t/" + str(topicID) + suffix
+    topicURL = base + "/t/" + topicSlug + "/" + str(topicID) + suffix
     topicData = getJSON(topicURL)
     catID = topicData["category_id"]
 
@@ -101,7 +101,7 @@ def main():
         autoLocked = True
 
     if not (wasDeleted or wasEdited or noText or autoLocked):
-        name = getCategory(jsonData["topic_id"])
+        name = getCategory(jsonData["topic_slug"], jsonData["topic_id"])
         postURL = base + "/t/" + jsonData["topic_slug"] + "/" + str(jsonData["topic_id"]) + "/" + str(
             jsonData["post_number"])
 
@@ -120,6 +120,7 @@ def main():
         postedTo = jsonData["topic_title"] + " on " + postedDate.strftime("%l:%M%p on %A, %B %d, %Y")
 
         for topic in cfg["discourse-map"]:
+
             if name == topic["name"]:
                 if topic["tag"] is None:
                     sendPing = False
@@ -131,7 +132,7 @@ def main():
 
                 if not isReply:
                     if sendPing:
-                        message = topic["tag"] + ", a new message was posted by "
+                        message = discordIDs[topic["tag"]] + ", a new message was posted by "
                     else:
                         message = "A new message was posted by "
                 else:
@@ -139,13 +140,16 @@ def main():
 
                 message = message + postedBy + " to " + postedTo + " UTC."
                 message = message.replace("  ", " ")
+                message = message.replace(" .", ".")
 
                 if not (topic["hook"] is None or topic["hook"] == ""):
                     hookURL = discordHooks[topic["hook"]]
                     message = message + " " + postURL
 
+                    data = {"content":message}
+
                     if len(message) > 0:
-                        r = requests.post(hookURL, json=message)
+                        r = requests.post(hookURL, json=data)
                         with open("logs/tosser-log.txt", 'w') as f:
                             print(r.status_code, r.text, file=f)
 
