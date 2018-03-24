@@ -141,7 +141,7 @@ def main():
                 message = message.replace("  ", " ")
 
                 if not (topic["hook"] is None or topic["hook"] == ""):
-                    hookURL = topic["hook"]
+                    hookURL = discordHooks[topic["hook"]]
                     message = message + " " + postURL
 
                     if len(message) > 0:
@@ -153,5 +153,7 @@ def main():
 
                 else:
                     return 1
+
+    return 0
 
 main()
