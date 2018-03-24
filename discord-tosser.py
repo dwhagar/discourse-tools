@@ -106,9 +106,9 @@ def main():
             jsonData["post_number"])
 
         if jsonData["post_number"] == 1:
-            isReply = True
-        else:
             isReply = False
+        else:
+            isReply = True
 
         postedDate = parse(jsonData["updated_at"])
 
@@ -125,10 +125,7 @@ def main():
                 if topic["tag"] is None:
                     sendPing = False
                 else:
-                    if isReply:
-                        sendPing = False
-                    else:
-                        sendPing = True
+                    sendPing = True
 
                 if not isReply:
                     if sendPing:
