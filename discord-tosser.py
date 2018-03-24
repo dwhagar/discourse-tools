@@ -2,9 +2,13 @@
 
 import sys
 import json
+import os
 import requests
-
 from dateutil.parser import parse
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 
 if len(sys.argv) > 1:
     fileName = sys.argv[1]
@@ -64,6 +68,9 @@ def getCategory(topicID):
 def main():
     # There should never be more than just the one line, but just in case it is
     # going to be stored in memory anyway, save time later.
+
+    if not os.path.isdir("logs"):
+        os.makedirs("logs")
 
     data = []
 
