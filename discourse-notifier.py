@@ -40,7 +40,7 @@ def getJSON(url):
     if getRequest.status_code == 200 and getRequest.json() != {}:
         jData = getRequest.json()
     else:
-        with open("logs/errors.txt", 'w') as f:
+        with open("logs/notifier-errors.txt", 'w') as f:
             print(getRequest.status_code, getRequest.text, file=f)
         jData = {}
 

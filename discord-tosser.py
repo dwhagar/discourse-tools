@@ -2,7 +2,8 @@
 
 import sys
 import json
-import subprocess
+import requests
+
 from dateutil.parser import parse
 
 if len(sys.argv) > 1:
@@ -25,34 +26,33 @@ for hook in cfg["hook-urls"]:
 for uid in cfg["ids"]:
     discordIDs[uid["name"]] = uid["id"]
 
-# Define our URL values and API key / user to use.
-curlCmd = "curl -sX GET "
-curlPost = "curl -s -X POST -d "
-
 auth = "?api_key=" + key + "&api_username=" + user
 suffix = ".json" + auth
 
-
-def getJSON(curlString):
+def getJSON(url):
     # Retrieve JSON data.
-    curlList = curlString.split()
-    rawOutput = subprocess.check_output(curlList)
-    jData = json.loads(str(rawOutput, 'utf-8'))
-    return jData
+    getRequest = requests.get(url)
+    if getRequest.status_code == 200 and getRequest.json() != {}:
+        jData = getRequest.json()
+    else:
+        with open("logs/tosser-errors.txt", 'w') as f:
+            print(getRequest.status_code, getRequest.text, file=f)
+        jData = {}
 
+    return jData
 
 def getCategory(topicID):
     # Initialize our return value.
     catName = "Uh..."
 
     # Get the topic's category ID
-    curlTopic = curlCmd + base + "/t/" + str(topicID) + suffix
-    topicData = getJSON(curlTopic)
+    topicURL = base + "/t/" + str(topicID) + suffix
+    topicData = getJSON(topicURL)
     catID = topicData["category_id"]
 
     # Get the data on all categories.
-    curlCategory = curlCmd + base + "/site" + suffix
-    catList = getJSON(curlCategory)
+    siteURL = base + "/site" + suffix
+    catList = getJSON(siteURL)
     catData = catList["categories"]
     for cat in catData:
         if cat["id"] == catID:
@@ -60,23 +60,6 @@ def getCategory(topicID):
             break
 
     return catName
-
-
-def buildMessage(sendPing, pingID, pingMsg, postedBy, postedTo):
-    # Helps to build messages for posting to Discord
-    if sendPing:
-        if pingID is None:
-            message = pingMsg
-        else:
-            message = pingID + pingMsg
-    else:
-        message = "A reply has been posted by "
-
-    message = message + postedBy + " to " + postedTo + " UTC."
-    message = message.replace("  ", " ")
-
-    return message
-
 
 def main():
     # There should never be more than just the one line, but just in case it is
@@ -114,12 +97,11 @@ def main():
         name = getCategory(jsonData["topic_id"])
         postURL = base + "/t/" + jsonData["topic_slug"] + "/" + str(jsonData["topic_id"]) + "/" + str(
             jsonData["post_number"])
-        message = "Uh..."
 
         if jsonData["post_number"] == 1:
-            sendPing = True
+            isReply = True
         else:
-            sendPing = False
+            isReply = False
 
         postedDate = parse(jsonData["updated_at"])
 
@@ -130,94 +112,39 @@ def main():
 
         postedTo = jsonData["topic_title"] + " on " + postedDate.strftime("%l:%M%p on %A, %B %d, %Y")
 
-        if name == "News and Announcements":
-            message = buildMessage(sendPing, discordIDs["players"],
-                                   ", a new announcement has been posted by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["announce"]
-        elif name == "Angelic Sins":
-            message = buildMessage(sendPing, discordIDs["as"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["as"]
-        elif name == "Blazing Umbra":
-            message = buildMessage(sendPing, discordIDs["bu"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["bu"]
-        elif name == "Embers of Soteria":
-            message = buildMessage(sendPing, discordIDs["eos"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["eos"]
-        elif name == "Phoenix Nebula":
-            message = buildMessage(sendPing, discordIDs["creative"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["phoenix"]
-        elif name == "Rants":
-            message = buildMessage(sendPing, None,
-                                   "A topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["rants"]
-        elif name == "Media":
-            message = buildMessage(sendPing, None,
-                                   "A topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["media"]
-        elif name == "Staff":
-            message = buildMessage(sendPing, discordIDs["staff"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["admin"]
-        elif name == "Requests":
-            message = buildMessage(sendPing, discordIDs["looking"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["requests"]
-        elif name == "Founders Hall":
-            message = buildMessage(sendPing, None,
-                                   "A topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["founders"]
-        elif name == "Characters":
-            message = buildMessage(sendPing, discordIDs["staff"],
-                                   ", a new character bio has been posted by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["phoenix"]
-        elif name == "Unlikely Kingdoms":
-            message = buildMessage(sendPing, discordIDs["players"],
-                                   ", a topic has been started by ",
-                                   postedBy,
-                                   postedTo)
-            hookURL = discordHooks["unlikely"]
-        else:
-            hookURL = ""
+        for topic in cfg["discourse-map"]:
+            if name == topic["name"]:
+                if topic["tag"] is None:
+                    sendPing = False
+                else:
+                    if isReply:
+                        sendPing = False
+                    else:
+                        sendPing = True
 
-        if hookURL == "":
-            return 1
+                if not isReply:
+                    if sendPing:
+                        message = topic["tag"] + ", a new message was posted by "
+                    else:
+                        message = "A new message was posted by "
+                else:
+                    message = "A reply has been posted by "
 
-        message = message + " " + postURL
+                message = message + postedBy + " to " + postedTo + " UTC."
+                message = message.replace("  ", " ")
 
-        postList = curlPost.split()
-        postList.append('{"content": "' + message + '"}')
-        postList.append("-H")
-        postList.append("Content-Type: application/json")
-        postList.append(hookURL)
-        rawOutput = subprocess.check_output(postList)
-        print(rawOutput)
+                if not (topic["hook"] is None or topic["hook"] == ""):
+                    hookURL = topic["hook"]
+                    message = message + " " + postURL
 
-        return 0
+                    if len(message) > 0:
+                        r = requests.post(hookURL, json=message)
+                        with open("logs/tosser-log.txt", 'w') as f:
+                            print(r.status_code, r.text, file=f)
+
+                    return 0
+
+                else:
+                    return 1
 
 main()
