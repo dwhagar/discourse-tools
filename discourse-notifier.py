@@ -130,9 +130,8 @@ def main():
         if len(toSend) > 0:
             toSend = list(reversed(toSend))
 
-            push = {}
-
             for notice in toSend:
+                push = {}
                 if notice["notification_type"] == 1: ### Mention ###
                     push["message"] = ":cyclone: You were mentioned in " + notice["data"]["topic_title"] + " by " + notice["data"][
                         "display_username"] + "."
