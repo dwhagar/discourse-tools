@@ -120,7 +120,6 @@ def main():
         postedTo = jsonData["topic_title"] + " on " + postedDate.strftime("%l:%M%p on %A, %B %d, %Y")
 
         for topic in cfg["discourse-map"]:
-
             if name == topic["name"]:
                 if topic["tag"] is None:
                     sendPing = False
